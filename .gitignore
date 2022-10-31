@@ -34,3 +34,17 @@
 *.db-shm
 *.db-wal
 *.opendb
+
+**/thirdparty
+**/binaries
+**/intermediate
+*.tlog
+*.log
+*.pdb
+
+x64/Debug/VulkanExperiment.vcxproj.FileListAbsolute.txt
+*.ilk
+*.recipe
+*.idb
+*.ipch
+.vs/VulkanExperiment/v17/.suo
