@@ -241,12 +241,29 @@ private:
 		return indices;
 	}
 
-	bool isDeviceSuitable(VkPhysicalDevice device)
+	bool CheckDeviceExtensionSupport(VkPhysicalDevice device) {
+		uint32_t extensionCount;
+		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+
+		std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+
+		std::set<std::string> requiredExtensions(m_DeviceExtensions.begin(), m_DeviceExtensions.end());
+
+		for (const auto& extension : availableExtensions) {
+			requiredExtensions.erase(extension.extensionName);
+		}
+
+		return requiredExtensions.empty();
+	}
+
+	bool IsDeviceSuitable(VkPhysicalDevice device)
 	{
 
 		QueueFamilyIndices indices = FindQueueFamilies(device);
+		bool extensionsSupported = CheckDeviceExtensionSupport(device);
 
-		return indices.isComplete();
+		return indices.isComplete() && extensionsSupported;
 	}
 
 
@@ -261,7 +278,7 @@ private:
 		vkEnumeratePhysicalDevices(m_Instance, &deviceCount, devices.data());
 
 		for (const auto& device : devices) {
-			if (isDeviceSuitable(device)) {
+			if (IsDeviceSuitable(device)) {
 				m_PhysicalDevice = device;
 				break;
 			}
@@ -370,6 +387,10 @@ private:
 	VkQueue m_GraphicsQueue;
 	VkSurfaceKHR m_Surface;
 	VkQueue m_PresentQueue;
+
+	const std::vector<const char*> m_DeviceExtensions = {
+	VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	};
 };
 
 int main() {
