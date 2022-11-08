@@ -18,6 +18,7 @@
 #include <cstdint> 
 #include <limits> // Necessary for std::numeric_limits
 #include <algorithm> 
+#include <fstream>
 
 
 #define VK_DIAGNOSTIC_MSG VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
@@ -99,6 +100,22 @@ private:
 		}
 
 		return VK_FALSE;
+	}
+
+	static std::vector<char> readFile(const std::string& filename) {
+		std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+		if (!file.is_open()) {
+			throw std::runtime_error("failed to open file!");
+		}
+		size_t fileSize = (size_t)file.tellg();
+		std::vector<char> buffer(fileSize);
+
+		file.seekg(0);
+		file.read(buffer.data(), fileSize);
+		file.close();
+
+		return buffer;
 	}
 
 	std::vector<const char*> GetRequiredExtensions()
@@ -518,6 +535,15 @@ private:
 		}
 	}
 
+	void CreateGraphicsPipeline() 
+	{
+		auto vertShaderCode = readFile("shaders/vert.spv");
+		auto fragShaderCode = readFile("shaders/frag.spv");
+
+		/*std::cout << vertShaderCode.size() << std::endl;
+		std::cout << fragShaderCode.size() << std::endl;*/
+	}
+
 	void InitVulkan()
 	{
 		CreateInstance();
@@ -527,6 +553,7 @@ private:
 		CreateLogicalDevice();
 		CreateSwapChain();
 		CreateImageViews();
+		CreateGraphicsPipeline();
 	}
 
 	void MainLoop()
