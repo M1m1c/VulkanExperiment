@@ -276,7 +276,7 @@ private:
 		uint32_t formatCount;
 		vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_Surface, &formatCount, nullptr);
 
-		if (formatCount != 0) 
+		if (formatCount != 0)
 		{
 			details.formats.resize(formatCount);
 			vkGetPhysicalDeviceSurfaceFormatsKHR(device, m_Surface, &formatCount, details.formats.data());
@@ -285,7 +285,7 @@ private:
 		uint32_t presentModeCount;
 		vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_Surface, &presentModeCount, nullptr);
 
-		if (presentModeCount != 0) 
+		if (presentModeCount != 0)
 		{
 			details.presentModes.resize(presentModeCount);
 			vkGetPhysicalDeviceSurfacePresentModesKHR(device, m_Surface, &presentModeCount, details.presentModes.data());
@@ -339,7 +339,7 @@ private:
 		}
 	}
 
-	VkShaderModule CreateShaderModule(const std::vector<char>& code) 
+	VkShaderModule CreateShaderModule(const std::vector<char>& code)
 	{
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
@@ -347,7 +347,7 @@ private:
 		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
 		VkShaderModule shaderModule;
-		if (vkCreateShaderModule(m_Device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) 
+		if (vkCreateShaderModule(m_Device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create shader module!");
 		}
@@ -355,7 +355,7 @@ private:
 		return shaderModule;
 	}
 
-	bool CheckDeviceExtensionSupport(VkPhysicalDevice device) 
+	bool CheckDeviceExtensionSupport(VkPhysicalDevice device)
 	{
 		uint32_t extensionCount;
 		vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
@@ -464,7 +464,7 @@ private:
 		}
 	}
 
-	void CreateSwapChain() 
+	void CreateSwapChain()
 	{
 		SwapChainSupportDetails swapChainSupport = QuerySwapChainSupport(m_PhysicalDevice);
 
@@ -473,8 +473,8 @@ private:
 		VkExtent2D extent = ChooseSwapExtent(swapChainSupport.capabilities);
 
 		uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
-		if (swapChainSupport.capabilities.maxImageCount > 0 && 
-			imageCount > swapChainSupport.capabilities.maxImageCount) 
+		if (swapChainSupport.capabilities.maxImageCount > 0 &&
+			imageCount > swapChainSupport.capabilities.maxImageCount)
 		{
 			imageCount = swapChainSupport.capabilities.maxImageCount;
 		}
@@ -522,7 +522,7 @@ private:
 		m_SwapChainExtent = extent;
 	}
 
-	void CreateImageViews() 
+	void CreateImageViews()
 	{
 		m_SwapChainImageViews.resize(m_SwapChainImages.size());
 		for (size_t i = 0; i < m_SwapChainImages.size(); i++)
@@ -551,7 +551,7 @@ private:
 		}
 	}
 
-	void CreateRenderPass() 
+	void CreateRenderPass()
 	{
 		VkAttachmentDescription colorAttachment{};
 		colorAttachment.format = m_SwapChainImageFormat;
@@ -584,7 +584,7 @@ private:
 		}
 	}
 
-	void CreateGraphicsPipeline() 
+	void CreateGraphicsPipeline()
 	{
 		auto vertShaderCode = readFile("shaders/vert.spv");
 		auto fragShaderCode = readFile("shaders/frag.spv");
@@ -682,7 +682,7 @@ private:
 		colorBlendAttachment.blendEnable = VK_FALSE;
 		colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
 		colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
-		
+
 		//For blending
 	/*	colorBlendAttachment.blendEnable = VK_TRUE;
 		colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
@@ -745,6 +745,30 @@ private:
 		vkDestroyShaderModule(m_Device, vertShaderModule, nullptr);
 	}
 
+	void CreateFramebuffers()
+	{
+		m_SwapChainFramebuffers.resize(m_SwapChainImageViews.size());
+
+		for (size_t i = 0; i < m_SwapChainImageViews.size(); i++)
+		{
+			VkImageView attachments[] = { m_SwapChainImageViews[i] };
+
+			VkFramebufferCreateInfo framebufferInfo{};
+			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebufferInfo.renderPass = m_RenderPass;
+			framebufferInfo.attachmentCount = 1;
+			framebufferInfo.pAttachments = attachments;
+			framebufferInfo.width = m_SwapChainExtent.width;
+			framebufferInfo.height = m_SwapChainExtent.height;
+			framebufferInfo.layers = 1;
+
+			if (vkCreateFramebuffer(m_Device, &framebufferInfo, nullptr, &m_SwapChainFramebuffers[i]) != VK_SUCCESS)
+			{
+				throw std::runtime_error("failed to create framebuffer!");
+			}
+		}
+	}
+
 	void InitVulkan()
 	{
 		CreateInstance();
@@ -756,6 +780,7 @@ private:
 		CreateImageViews();
 		CreateRenderPass();
 		CreateGraphicsPipeline();
+		CreateFramebuffers();
 	}
 
 	void MainLoop()
@@ -768,6 +793,12 @@ private:
 
 	void Cleanup()
 	{
+
+		for (auto framebuffer : m_SwapChainFramebuffers) {
+			vkDestroyFramebuffer(m_Device, framebuffer, nullptr);
+		}
+
+
 		vkDestroyPipeline(m_Device, m_GraphicsPipeline, nullptr);
 
 		vkDestroyPipelineLayout(m_Device, m_PipelineLayout, nullptr);
@@ -820,6 +851,8 @@ private:
 	VkRenderPass m_RenderPass;
 	VkPipelineLayout m_PipelineLayout;
 	VkPipeline m_GraphicsPipeline;
+
+	std::vector<VkFramebuffer> m_SwapChainFramebuffers;
 
 	const std::vector<const char*> m_DeviceExtensions = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
