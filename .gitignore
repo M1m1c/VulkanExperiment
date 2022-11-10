@@ -48,3 +48,4 @@ x64/Debug/VulkanExperiment.vcxproj.FileListAbsolute.txt
 *.idb
 *.ipch
 .vs/VulkanExperiment/v17/.suo
+textures/texture.jpg
