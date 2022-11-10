@@ -11,9 +11,14 @@
 #include <glm/vec4.hpp>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
+#define TINYOBJLOADER_IMPLEMENTATION
+#include <tiny_obj_loader.h>
 
 #include <chrono>
 #include <iostream>
@@ -27,6 +32,7 @@
 #include <algorithm> 
 #include <fstream>
 #include <array>
+#include <unordered_map>
 
 
 #define VK_DIAGNOSTIC_MSG VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
@@ -40,6 +46,9 @@
 const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 const int MAX_FRAMES_IN_FLIGHT = 2;
+
+const std::string MODEL_PATH = "assets/kv2.obj";
+const std::string TEXTURE_PATH = "assets/KV2_diff.jpg";
 
 
 const std::vector<const char*> validationLayers = {
@@ -70,6 +79,81 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
 	}
 }
 
+struct QueueFamilyIndices
+{
+	std::optional<uint32_t> graphicsFamily;
+	std::optional<uint32_t> presentFamily;
+
+	bool isComplete() {
+		return graphicsFamily.has_value();
+	}
+};
+
+struct SwapChainSupportDetails {
+	VkSurfaceCapabilitiesKHR capabilities;
+	std::vector<VkSurfaceFormatKHR> formats;
+	std::vector<VkPresentModeKHR> presentModes;
+};
+
+struct Vertex {
+	glm::vec3 pos;
+	glm::vec3 color;
+	glm::vec2 texCoord;
+
+
+	static VkVertexInputBindingDescription getBindingDescription()
+	{
+		VkVertexInputBindingDescription bindingDescription{};
+		bindingDescription.binding = 0;
+		bindingDescription.stride = sizeof(Vertex);
+		bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+		return bindingDescription;
+	}
+
+	static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
+		std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
+
+		attributeDescriptions[0].binding = 0;
+		attributeDescriptions[0].location = 0;
+		attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[0].offset = offsetof(Vertex, pos);
+
+		attributeDescriptions[1].binding = 0;
+		attributeDescriptions[1].location = 1;
+		attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[1].offset = offsetof(Vertex, color);
+
+		attributeDescriptions[2].binding = 0;
+		attributeDescriptions[2].location = 2;
+		attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
+
+		return attributeDescriptions;
+	}
+
+	bool operator==(const Vertex& other) const {
+		return pos == other.pos && color == other.color && texCoord == other.texCoord;
+	}
+};
+
+namespace std {
+	template<> struct hash<Vertex> {
+		size_t operator()(Vertex const& vertex) const {
+			return ((hash<glm::vec3>()(vertex.pos) ^
+				(hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^
+				(hash<glm::vec2>()(vertex.texCoord) << 1);
+		}
+	};
+}
+
+struct UniformBufferObject {
+	glm::mat4 model;
+	glm::mat4 view;
+	glm::mat4 proj;
+};
+
+
 class HelloTriangleApplication {
 public:
 	void Run() {
@@ -79,68 +163,10 @@ public:
 		Cleanup();
 	}
 
+
 private:
 
-	struct QueueFamilyIndices
-	{
-		std::optional<uint32_t> graphicsFamily;
-		std::optional<uint32_t> presentFamily;
-
-		bool isComplete() {
-			return graphicsFamily.has_value();
-		}
-	};
-
-	struct SwapChainSupportDetails {
-		VkSurfaceCapabilitiesKHR capabilities;
-		std::vector<VkSurfaceFormatKHR> formats;
-		std::vector<VkPresentModeKHR> presentModes;
-	};
-
-	struct Vertex {
-		glm::vec3 pos;
-		glm::vec3 color;
-		glm::vec2 texCoord;
-
-
-		static VkVertexInputBindingDescription getBindingDescription() 
-		{
-			VkVertexInputBindingDescription bindingDescription{};
-			bindingDescription.binding = 0;
-			bindingDescription.stride = sizeof(Vertex);
-			bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
-			return bindingDescription;
-		}
-
-		static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
-			std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
-
-			attributeDescriptions[0].binding = 0;
-			attributeDescriptions[0].location = 0;
-			attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-			attributeDescriptions[0].offset = offsetof(Vertex, pos);
-
-			attributeDescriptions[1].binding = 0;
-			attributeDescriptions[1].location = 1;
-			attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-			attributeDescriptions[1].offset = offsetof(Vertex, color);
-
-			attributeDescriptions[2].binding = 0;
-			attributeDescriptions[2].location = 2;
-			attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-			attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
-
-			return attributeDescriptions;
-		}
-	};
-
-	struct UniformBufferObject {
-		glm::mat4 model;
-		glm::mat4 view;
-		glm::mat4 proj;
-	};
-
+	
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 		VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -741,7 +767,7 @@ private:
 		rasterizer.rasterizerDiscardEnable = VK_FALSE;
 		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizer.lineWidth = 1.0f;
-		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+		rasterizer.cullMode = VK_CULL_MODE_NONE;
 		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		rasterizer.depthBiasEnable = VK_FALSE;
 		rasterizer.depthBiasConstantFactor = 0.0f; // Optional
@@ -927,7 +953,7 @@ private:
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 
-		vkCmdBindIndexBuffer(commandBuffer, m_IndexBuffer, 0, VK_INDEX_TYPE_UINT16);
+		vkCmdBindIndexBuffer(commandBuffer, m_IndexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
 		VkViewport viewport{};
 		viewport.x = 0.0f;
@@ -1089,7 +1115,7 @@ private:
 
 		vkFreeCommandBuffers(m_Device, m_CommandPool, 1, &commandBuffer);
 	}
-
+	//VK_BUFFER_USAGE_TRANSFER_DST_BIT
 	void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 	{
 		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
@@ -1121,7 +1147,7 @@ private:
 
 		CreateBuffer(
 			bufferSize,
-			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 			m_VertexBuffer,
 			m_VertexBufferMemory);
@@ -1413,7 +1439,7 @@ private:
 	void CreateTextureImage() 
 	{
 		int texWidth, texHeight, texChannels;
-		stbi_uc* pixels = stbi_load("textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+		stbi_uc* pixels = stbi_load(TEXTURE_PATH.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 		VkDeviceSize imageSize = texWidth * texHeight * 4;
 
 		if (!pixels) {
@@ -1569,6 +1595,50 @@ private:
 		m_DepthImageView = createImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
 	}
 
+	void LoadModel() 
+	{
+		tinyobj::attrib_t attrib;
+		std::vector<tinyobj::shape_t> shapes;
+		std::vector<tinyobj::material_t> materials;
+		std::string warn, err;
+
+		if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, MODEL_PATH.c_str())) {
+			throw std::runtime_error(warn + err);
+		}
+
+		std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+
+		for (const auto& shape : shapes) {
+			for (const auto& index : shape.mesh.indices) {
+				Vertex vertex{};
+
+			
+
+				vertex.pos = {
+					attrib.vertices[3 * index.vertex_index + 0],
+					attrib.vertices[3 * index.vertex_index + 1],
+					attrib.vertices[3 * index.vertex_index + 2]
+				};
+
+				vertex.texCoord = {
+					attrib.texcoords[2 * index.texcoord_index + 0],
+					1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
+				};
+
+				vertex.color = { 1.0f, 1.0f, 1.0f };
+
+				if (uniqueVertices.count(vertex) == 0) {
+					uniqueVertices[vertex] = static_cast<uint32_t>(m_Vertices.size());
+					m_Vertices.push_back(vertex);
+				}
+
+				m_Indices.push_back(uniqueVertices[vertex]);
+			}
+		}
+
+
+	}
+
 	void InitVulkan()
 	{
 		CreateInstance();
@@ -1587,6 +1657,7 @@ private:
 		CreateTextureImage();
 		CreateTextureImageView();
 		CreateTextureSampler();
+		LoadModel();
 		CreateVertexBuffer();
 		CreateIndexBuffer();
 		CreateUniformBuffers();
@@ -1770,6 +1841,9 @@ private:
 	uint32_t m_CurrentFrame = 0;
 	bool m_FramebufferResized = false;
 
+	std::vector<Vertex> m_Vertices;
+	std::vector<uint32_t> m_Indices;
+
 	VkBuffer m_VertexBuffer;
 	VkDeviceMemory m_VertexBufferMemory;
 	VkBuffer m_IndexBuffer;
@@ -1795,7 +1869,7 @@ private:
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
 
-	const std::vector<Vertex> m_Vertices = {
+	/*const std::vector<Vertex> m_Vertices = {
 	 {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
 	{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
 	{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
@@ -1810,8 +1884,9 @@ private:
 	const std::vector<uint16_t> m_Indices = {
 		0, 1, 2, 2, 3, 0,
 		4, 5, 6, 6, 7, 4
-	};
+	};*/
 };
+
 
 int main() {
 	HelloTriangleApplication app;
