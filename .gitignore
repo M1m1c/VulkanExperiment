@@ -38,6 +38,7 @@
 **/thirdparty
 **/binaries
 **/intermediate
+**/assets
 *.tlog
 *.log
 *.pdb
