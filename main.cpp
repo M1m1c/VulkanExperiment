@@ -35,6 +35,9 @@
 #include <unordered_map>
 
 
+#include "Camera.h"
+#include "CameraController.h"
+
 #define VK_DIAGNOSTIC_MSG VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
 #define VK_INFO_MSG VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
 #define VK_WARNING_MSG VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
@@ -162,7 +165,6 @@ public:
 		MainLoop();
 		Cleanup();
 	}
-
 
 private:
 
@@ -294,6 +296,18 @@ private:
 		m_Window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
 		glfwSetWindowUserPointer(m_Window, this);
 		glfwSetFramebufferSizeCallback(m_Window, FramebufferResizeCallback);
+		//m_CameraUniform= CameraUniform(Camera(glm::vec3));
+		m_CameraController = std::make_unique<CameraController>();
+		glfwSetWindowUserPointer(m_Window, &m_CameraController);
+		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scanCode, int action, int mods)
+			{
+				std::shared_ptr<CameraController>& controller = *(std::shared_ptr<CameraController>*)glfwGetWindowUserPointer(window);
+				if (controller->OnKeyPressed(key, action)) {
+					std::cout << "key pressed:" << key << std::endl;
+				}
+			});
+		//glfwSetMouseButtonCallback()
+		//glfwSetCursorPosCallback()
 	}
 
 	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
@@ -1868,6 +1882,10 @@ private:
 	const std::vector<const char*> m_DeviceExtensions = {
 	VK_KHR_SWAPCHAIN_EXTENSION_NAME
 	};
+
+
+	std::unique_ptr<CameraController> m_CameraController;
+	//CameraUniform m_CameraUniform;
 
 	/*const std::vector<Vertex> m_Vertices = {
 	 {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
