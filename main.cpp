@@ -1,3 +1,8 @@
+
+
+#include "Camera.h"
+#include "CameraController.h"
+
 //#define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -34,9 +39,6 @@
 #include <array>
 #include <unordered_map>
 
-
-#include "Camera.h"
-#include "CameraController.h"
 
 #define VK_DIAGNOSTIC_MSG VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT
 #define VK_INFO_MSG VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
@@ -159,6 +161,7 @@ struct UniformBufferObject {
 
 class HelloTriangleApplication {
 public:
+
 	void Run() {
 		InitWindow();
 		InitVulkan();
@@ -296,14 +299,20 @@ private:
 		m_Window = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
 		glfwSetWindowUserPointer(m_Window, this);
 		glfwSetFramebufferSizeCallback(m_Window, FramebufferResizeCallback);
-		//m_CameraUniform= CameraUniform(Camera(glm::vec3));
+
+		//TODO figure out why we cant set it up like this
+		m_CameraUniform = CameraUniform(
+			Camera(glm::vec3(-1.f, 0.f, 0.5f), 0.f, 0.f),
+			Projection(WIDTH, HEIGHT, 60.f, 0.1f, 10.0f));
+
 		m_CameraController = std::make_unique<CameraController>();
 		glfwSetWindowUserPointer(m_Window, &m_CameraController);
+
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scanCode, int action, int mods)
 			{
 				std::shared_ptr<CameraController>& controller = *(std::shared_ptr<CameraController>*)glfwGetWindowUserPointer(window);
 				if (controller->OnKeyPressed(key, action)) {
-					std::cout << "key pressed:" << key << std::endl;
+					//std::cout << "key pressed:" << key << std::endl;
 				}
 			});
 		//glfwSetMouseButtonCallback()
@@ -1049,6 +1058,8 @@ private:
 		CreateImageViews();
 		CreateDepthResources();
 		CreateFramebuffers();
+		m_CameraUniform.Proj.Resize(m_SwapChainExtent.width, m_SwapChainExtent.height);
+
 		m_FramebufferResized = false;
 	}
 
@@ -1324,14 +1335,19 @@ private:
 		static auto startTime = std::chrono::high_resolution_clock::now();
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
-		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count() * 0.5f;
+		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+		
 
 		UniformBufferObject ubo{};
-		ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		//ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		ubo.model = glm::mat4(1.0f);
 
-		ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		//TODO change out view and projeciton to be based on camera uniform
+		ubo.view = m_CameraUniform.Cam.CalcViewMatrix(); 
+		//glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
-		ubo.proj = glm::perspective(glm::radians(45.0f), m_SwapChainExtent.width / (float)m_SwapChainExtent.height, 0.1f, 10.0f);
+		ubo.proj = m_CameraUniform.Proj.CalcProjectionMatrix();
+		//glm::perspective(glm::radians(45.0f), m_SwapChainExtent.width / (float)m_SwapChainExtent.height, 0.1f, 10.0f);
 		
 		ubo.proj[1][1] *= -1;
 
@@ -1755,7 +1771,12 @@ private:
 	{
 		while (!glfwWindowShouldClose(m_Window))
 		{
+			float currentTime = glfwGetTime();//Should be in a platform class
+			float deltaTime = currentTime - m_LastFrameTime;
+			m_LastFrameTime = currentTime;
+
 			glfwPollEvents();
+			m_CameraController->UpdateCamera(deltaTime, m_CameraUniform.Cam);
 			DrawFrame();
 		}
 
@@ -1885,7 +1906,8 @@ private:
 
 
 	std::unique_ptr<CameraController> m_CameraController;
-	//CameraUniform m_CameraUniform;
+	CameraUniform m_CameraUniform;
+	float m_LastFrameTime;
 
 	/*const std::vector<Vertex> m_Vertices = {
 	 {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
