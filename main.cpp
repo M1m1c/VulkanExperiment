@@ -315,6 +315,16 @@ private:
 					//std::cout << "key pressed:" << key << std::endl;
 				}
 			});
+
+		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xpos, double ypos)
+			{
+				std::shared_ptr<CameraController>& controller = *(std::shared_ptr<CameraController>*)glfwGetWindowUserPointer(window);
+				
+				std::cout <<  xpos << std::endl;
+				if (controller->OnMouseMoved(xpos, ypos)) {
+					
+				}
+			});
 		//glfwSetMouseButtonCallback()
 		//glfwSetCursorPosCallback()
 	}
@@ -1776,7 +1786,7 @@ private:
 			m_LastFrameTime = currentTime;
 
 			glfwPollEvents();
-			m_CameraController->UpdateCamera(deltaTime, m_CameraUniform.Cam);
+			m_CameraController->UpdateCamera(deltaTime, m_CameraUniform);
 			DrawFrame();
 		}
 

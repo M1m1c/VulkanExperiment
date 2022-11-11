@@ -8,9 +8,10 @@ public:
 	~CameraController() = default;
 
 	bool OnKeyPressed(int key, int action);
+	bool OnMouseMoved(float mouseX, float mouseY);
 	
 
-	void UpdateCamera(float deltaTime, struct Camera& camera);
+	void UpdateCamera(float deltaTime, struct CameraUniform& cameraUniform);
 	
 
 private:
@@ -18,9 +19,10 @@ private:
 	glm::vec2 inputAxis{0.f,0.f};
 	float amount_up;
 	float amount_down;
-	float rotate_horizontal;
-	float rotate_vertical;
+	float rotate_horizontal =0.f;
+	float old_rotate_horizontal =0.f;
+	float rotate_vertical =0.f;
 	float scroll;
 	float speed = 1.f;
-	float sensitivity = 0.4f;
+	float sensitivity = 10.f;
 };

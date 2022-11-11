@@ -48,18 +48,28 @@ bool CameraController::OnKeyPressed(int key, int action)
 	return retval;
 }
 
-void CameraController::UpdateCamera(float deltaTime, Camera& camera)
+bool CameraController::OnMouseMoved(float mouseX, float mouseY)
+{
+	rotate_horizontal = mouseX;
+	rotate_vertical = mouseY;
+	return false;
+}
+
+void CameraController::UpdateCamera(float deltaTime, CameraUniform& cameraUniform)
 {
 	//Directionals
-	auto forward = camera.GetCamForward();
+
+	auto& cam = cameraUniform.Cam;
+	auto forward = cam.GetCamForward();
 	
 	glm::vec3 right = glm::normalize(glm::cross(forward, glm::vec3(0.f, 0.f, 1.f)));
 
 	glm::vec3 dir = glm::normalize((forward * inputAxis.x) + (right * inputAxis.y));
 
 	dir = glm::isnan(dir).b ? glm::vec3(0.f) : dir;
-	camera.Position = camera.Position +( dir * speed * deltaTime);
+	cam.Position = cam.Position +( dir * speed * deltaTime);
 
+	cam.Position.z += (amount_up - amount_down) * speed * deltaTime;
 
 
 }

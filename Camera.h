@@ -23,10 +23,14 @@ public:
 	Projection(u32 width, u32 height, f32 fov, f32 znear, f32 zfar);
 	void Resize(u32 width, u32 height);
 	mat4 CalcProjectionMatrix();
+	vec2 GetWidthHeight();
 	f32 Aspect;
 	f32 Fov;
 	f32 Z_near;
 	f32 Z_far;
+private:
+	u32 Width;
+	u32 Height;
 };
 
 struct CameraUniform

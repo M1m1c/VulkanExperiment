@@ -31,6 +31,8 @@ vec3 Camera::GetCamForward()
 
 Projection::Projection()
 {
+	Width = 0;
+	Height = 0;
 	Aspect = 0.f;
 	Fov = 0.f;
 	Z_near = 0.f;
@@ -38,9 +40,10 @@ Projection::Projection()
 }
 
 Projection::Projection(u32 width, u32 height, f32 fov, f32 znear, f32 zfar) :
-	Fov(fov), Z_near(znear), Z_far(zfar)
+	Width(width),Height(height), Fov(fov), Z_near(znear), Z_far(zfar)
 {
 	Aspect = (f32)width / (f32)height;
+
 }
 
 void Projection::Resize(u32 width, u32 height)
@@ -51,6 +54,11 @@ void Projection::Resize(u32 width, u32 height)
 mat4 Projection::CalcProjectionMatrix()
 {
 	return glm::perspective(glm::radians(Fov), Aspect, Z_near, Z_far);
+}
+
+vec2 Projection::GetWidthHeight()
+{
+	return vec2(Width,Height);
 }
 
 CameraUniform::CameraUniform()
