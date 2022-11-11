@@ -1,6 +1,5 @@
 #pragma once
-#include "Camera.h"
-#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 class CameraController
 {
@@ -8,30 +7,16 @@ public:
 	CameraController() = default;
 	~CameraController() = default;
 
-	inline bool OnKeyPressed(int key, int action)
-	{
-		bool retval = false;
-		float amount = action == GLFW_PRESS ? 1.0f : 0.0f;
-		switch (key)
-		{
-		case GLFW_KEY_W:
-		case GLFW_KEY_UP:
-			amount_forward = amount;
-			retval = true;
-			break;
+	bool OnKeyPressed(int key, int action);
+	
 
-
-		}
-
-		return retval;
-	}
-
-	inline void UpdateCamera(float deltaTime, Camera& camera)
-	{
-
-	}
+	void UpdateCamera(float deltaTime, struct Camera& camera);
+	
 
 private:
+
+	glm::vec2 inputAxis{0.f,0.f};
+	//glm::vec2 inputYAxis{0.f,0.f};
 	float amount_left;
 	float amount_right;
 	float amount_forward;
@@ -41,6 +26,6 @@ private:
 	float rotate_horizontal;
 	float rotate_vertical;
 	float scroll;
-	float speed = 4.0f;
+	float speed = 1.f;
 	float sensitivity = 0.4f;
 };
