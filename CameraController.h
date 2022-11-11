@@ -16,11 +16,6 @@ public:
 private:
 
 	glm::vec2 inputAxis{0.f,0.f};
-	//glm::vec2 inputYAxis{0.f,0.f};
-	float amount_left;
-	float amount_right;
-	float amount_forward;
-	float amount_backward;
 	float amount_up;
 	float amount_down;
 	float rotate_horizontal;
