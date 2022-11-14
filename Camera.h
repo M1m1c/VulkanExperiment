@@ -13,8 +13,8 @@ public:
 	mat4 CalcViewMatrix();
 	vec3 GetCamForward();
 	vec3 Position;
-	f32 Yaw;
 	f32 Pitch;
+	f32 Yaw;
 };
 
 struct Projection {

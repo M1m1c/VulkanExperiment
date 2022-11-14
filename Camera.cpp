@@ -6,12 +6,12 @@
 Camera::Camera()
 {
 	Position = vec3(0.f);
-	Yaw = 0.f;
 	Pitch = 0.f;
+	Yaw = 0.f;
 }
 
-Camera::Camera(vec3 position, f32 yaw, f32 pitch) :
-	Position(position), Yaw(yaw), Pitch(pitch)
+Camera::Camera(vec3 position, f32 pitch, f32 yaw) :
+	Position(position), Pitch(pitch), Yaw(yaw)
 {
 }
 
@@ -23,9 +23,9 @@ mat4 Camera::CalcViewMatrix()
 vec3 Camera::GetCamForward()
 {
 	glm::vec3 dir;
-	dir.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-	dir.y = -sin(glm::radians(Pitch));
-	dir.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+	dir.x = cos(glm::radians(Pitch)) * cos(glm::radians(Yaw));
+	dir.y = -sin(glm::radians(Yaw));
+	dir.z = sin(glm::radians(Pitch));
 	return glm::normalize(dir);
 }
 
