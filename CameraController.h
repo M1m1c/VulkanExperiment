@@ -19,11 +19,8 @@ public:
 private:
 
 	glm::vec3 inputAxis{0.f,0.f,0.f};
-	float amount_up;
-	float amount_down;
-	float rotate_horizontal =0.f;
-	float old_rotate_horizontal =0.f;
-	float rotate_vertical =0.f;
+	float mouseRotateHorizontal = 0.f;
+	float mouseRotateVertical = 0.f;
 	float scroll;
 	float speed = 1.f;
 	float sensitivity = 15.f;

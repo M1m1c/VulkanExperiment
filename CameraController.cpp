@@ -73,15 +73,9 @@ bool CameraController::OnMouseMoved(float mouseX, float mouseY)
 {
 	if (mouseButtonDown)
 	{
-		rotate_horizontal = mouseX;
-		rotate_vertical = mouseY;
+		mouseRotateHorizontal = mouseX;
+		mouseRotateVertical = mouseY;
 	}
-	
-	///*else
-	//{
-	//	rotate_horizontal = 0.f;
-	//	rotate_vertical = 0.f;
-	//}*/
 
 	return false;
 }
@@ -94,8 +88,8 @@ bool CameraController::OnMouseButtonInput(int key, int action)
 
 	if (value == 0)
 	{
-		rotate_horizontal = 0.f;
-		rotate_vertical = 0.f;
+		mouseRotateHorizontal = 0.f;
+		mouseRotateVertical = 0.f;
 	}
 
 	return value;
@@ -108,10 +102,10 @@ void CameraController::UpdateCamera(float deltaTime, CameraUniform& cameraUnifor
 	auto& cam = cameraUniform.Cam;
 	auto forward = cam.GetCamForward();
 
-	glm::vec3 right = glm::normalize(glm::cross(forward, glm::vec3(0.f, 0.f, 1.f)));
+	glm::vec3 right = glm::normalize(glm::cross(forward, WorldUp));
 
-	inputAxis.x = (DirInputs[0] == 1 ? 1.f : (DirInputs[1] == 1 ? -1.f : 0.f));
-	inputAxis.y = (DirInputs[2] == 1 ? -1.f : (DirInputs[3] == 1 ? 1.f : 0.f));
+	inputAxis.x = (DirInputs[0] == 1 ? -1.f : (DirInputs[1] == 1 ? 1.f : 0.f));
+	inputAxis.y = (DirInputs[2] == 1 ? 1.f : (DirInputs[3] == 1 ? -1.f : 0.f));
 	inputAxis.z = (DirInputs[4] == 1 ? 1.f : (DirInputs[5] == 1 ? -1.f : 0.f));
 
 	glm::vec3 dir = glm::normalize((forward * inputAxis.x) + (right * inputAxis.y) + (WorldUp * inputAxis.z));
@@ -131,9 +125,8 @@ void CameraController::UpdateCamera(float deltaTime, CameraUniform& cameraUnifor
 		auto halfWidth = (widthHeight.x * 0.5f);
 		auto halfHeight = (widthHeight.y * 0.5f);
 
-		yawDir = glm::clamp(rotate_horizontal - halfWidth, -halfWidth, halfWidth);
-		pitchDir = glm::clamp(rotate_vertical - halfHeight, -halfHeight, halfHeight);
-		//auto yawDir = rotate_horizontal < (widthHeight.x * 0.5) ? -1.f : rotate_horizontal >(widthHeight.x * 0.5) ? 1.f : 0.f;	
+		yawDir = glm::clamp(mouseRotateHorizontal - halfWidth, -halfWidth, halfWidth);
+		pitchDir = glm::clamp(mouseRotateVertical - halfHeight, -halfHeight, halfHeight);	
 	}
 	else if (RotInputs.any())
 	{
@@ -141,6 +134,6 @@ void CameraController::UpdateCamera(float deltaTime, CameraUniform& cameraUnifor
 		pitchDir = (RotInputs[2] == 1 ? -200.f : (RotInputs[3] == 1 ? 200.f : 0.f));
 	}
 	cam.Yaw += glm::radians(yawDir) * sensitivity * deltaTime;
-	cam.Pitch -= glm::radians(pitchDir) * sensitivity * deltaTime;
+	cam.Pitch += glm::radians(pitchDir) * sensitivity * deltaTime;
 	
 }
