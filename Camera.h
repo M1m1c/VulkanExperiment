@@ -3,7 +3,7 @@
 
 using namespace glm;
 
-const  glm::vec3 worldUp = glm::vec3(0.0f, 0.0f, 1.0f);
+static const  glm::vec3 WorldUp = glm::vec3(0.0f, 0.0f, 1.0f);
 
 struct Camera
 {

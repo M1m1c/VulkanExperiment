@@ -17,7 +17,7 @@ Camera::Camera(vec3 position, f32 yaw, f32 pitch) :
 
 mat4 Camera::CalcViewMatrix()
 {
-	return glm::lookAtRH(Position, Position + GetCamForward(), worldUp);
+	return glm::lookAtRH(Position, Position + GetCamForward(), WorldUp);
 }
 
 vec3 Camera::GetCamForward()

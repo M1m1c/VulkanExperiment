@@ -1,5 +1,6 @@
 #pragma once
 #include <glm/glm.hpp>
+#include <bitset>
 
 class CameraController
 {
@@ -16,7 +17,7 @@ public:
 
 private:
 
-	glm::vec2 inputAxis{0.f,0.f};
+	glm::vec3 inputAxis{0.f,0.f,0.f};
 	float amount_up;
 	float amount_down;
 	float rotate_horizontal =0.f;
@@ -25,4 +26,7 @@ private:
 	float scroll;
 	float speed = 1.f;
 	float sensitivity = 10.f;
+
+	std::bitset<6> DirInputs;
+	
 };
