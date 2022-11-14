@@ -171,7 +171,7 @@ public:
 
 private:
 
-	
+
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 		VkDebugUtilsMessageTypeFlagsEXT messageType,
@@ -218,7 +218,7 @@ private:
 		return extensions;
 	}
 
-	static void FramebufferResizeCallback(GLFWwindow* window, int width, int height) 
+	static void FramebufferResizeCallback(GLFWwindow* window, int width, int height)
 	{
 		auto app = reinterpret_cast<HelloTriangleApplication*>(glfwGetWindowUserPointer(window));
 		app->m_FramebufferResized = true;
@@ -302,7 +302,7 @@ private:
 
 		//TODO figure out why we cant set it up like this
 		m_CameraUniform = CameraUniform(
-			Camera(glm::vec3(-1.f, 0.f, 0.5f), 0.f, 0.f),
+			Camera(glm::vec3(0.f, 0.5f, 2.f), 0.f, 0.f),
 			Projection(WIDTH, HEIGHT, 60.f, 0.1f, 10.0f));
 
 		m_CameraController = std::make_unique<CameraController>();
@@ -311,30 +311,24 @@ private:
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scanCode, int action, int mods)
 			{
 				std::shared_ptr<CameraController>& controller = *(std::shared_ptr<CameraController>*)glfwGetWindowUserPointer(window);
-				if (controller->OnKeyInput(key, action)) {
-					//std::cout << "key pressed:" << key << std::endl;
-				}
+
+				controller->OnKeyInput(key, action);
 			});
 
-		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods) 
+		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
 			{
 				std::shared_ptr<CameraController>& controller = *(std::shared_ptr<CameraController>*)glfwGetWindowUserPointer(window);
-				
-				if (controller->OnMouseButtonInput(button, action)) {
-					
-				}
+
+				controller->OnMouseButtonInput(button, action);
 			});
 
 		glfwSetCursorPosCallback(m_Window, [](GLFWwindow* window, double xpos, double ypos)
 			{
 				std::shared_ptr<CameraController>& controller = *(std::shared_ptr<CameraController>*)glfwGetWindowUserPointer(window);
-				
-				std::cout << ypos<< std::endl;
-				if (controller->OnMouseMoved(xpos, ypos)) {
-					
-				}
+
+				controller->OnMouseMoved(xpos, ypos);
 			});
-		
+
 		//glfwSetCursorPosCallback()
 	}
 
@@ -660,7 +654,7 @@ private:
 	{
 		m_SwapChainImageViews.resize(m_SwapChainImages.size());
 
-		for (uint32_t i = 0; i < m_SwapChainImages.size(); i++) 
+		for (uint32_t i = 0; i < m_SwapChainImages.size(); i++)
 		{
 			m_SwapChainImageViews[i] = createImageView(m_SwapChainImages[i], m_SwapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
 		}
@@ -776,8 +770,8 @@ private:
 		vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
 		vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
-		
-		
+
+
 
 		VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
 		inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -1082,15 +1076,15 @@ private:
 		m_FramebufferResized = false;
 	}
 
-	uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) 
+	uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 	{
 		VkPhysicalDeviceMemoryProperties memProperties;
 		vkGetPhysicalDeviceMemoryProperties(m_PhysicalDevice, &memProperties);
 
-		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) 
+		for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++)
 		{
 			if ((typeFilter & (1 << i)) &&
-				(memProperties.memoryTypes[i].propertyFlags & properties) == properties) 
+				(memProperties.memoryTypes[i].propertyFlags & properties) == properties)
 			{
 				return i;
 			}
@@ -1125,7 +1119,7 @@ private:
 		vkBindBufferMemory(m_Device, buffer, bufferMemory, 0);
 	}
 
-	VkCommandBuffer BeginSingleTimeCommands() 
+	VkCommandBuffer BeginSingleTimeCommands()
 	{
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -1145,7 +1139,7 @@ private:
 		return commandBuffer;
 	}
 
-	void EndSingleTimeCommands(VkCommandBuffer commandBuffer) 
+	void EndSingleTimeCommands(VkCommandBuffer commandBuffer)
 	{
 		vkEndCommandBuffer(commandBuffer);
 
@@ -1171,7 +1165,7 @@ private:
 		EndSingleTimeCommands(commandBuffer);
 	}
 
-	void CreateVertexBuffer() 
+	void CreateVertexBuffer()
 	{
 		VkDeviceSize bufferSize = sizeof(m_Vertices[0]) * m_Vertices.size();
 
@@ -1202,7 +1196,7 @@ private:
 		vkFreeMemory(m_Device, stagingBufferMemory, nullptr);
 	}
 
-	void CreateIndexBuffer() 
+	void CreateIndexBuffer()
 	{
 		VkDeviceSize bufferSize = sizeof(m_Indices[0]) * m_Indices.size();
 
@@ -1212,7 +1206,7 @@ private:
 			bufferSize,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			stagingBuffer, 
+			stagingBuffer,
 			stagingBufferMemory);
 
 		void* data;
@@ -1280,7 +1274,7 @@ private:
 	}
 
 
-	void CreateDescriptorSets() 
+	void CreateDescriptorSets()
 	{
 		std::vector<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, m_DescriptorSetLayout);
 		VkDescriptorSetAllocateInfo allocInfo{};
@@ -1294,7 +1288,7 @@ private:
 			throw std::runtime_error("failed to allocate descriptor sets!");
 		}
 
-		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) 
+		for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
 		{
 			VkDescriptorBufferInfo bufferInfo{};
 			bufferInfo.buffer = m_UniformBuffers[i];
@@ -1334,7 +1328,7 @@ private:
 
 	}
 
-	void CreateUniformBuffers() 
+	void CreateUniformBuffers()
 	{
 		VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
@@ -1355,19 +1349,19 @@ private:
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-		
+
 
 		UniformBufferObject ubo{};
 		//ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		ubo.model = glm::mat4(1.0f);
 
 		//TODO change out view and projeciton to be based on camera uniform
-		ubo.view = m_CameraUniform.Cam.CalcViewMatrix(); 
+		ubo.view = m_CameraUniform.Cam.CalcViewMatrix();
 		//glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
 		ubo.proj = m_CameraUniform.Proj.CalcProjectionMatrix();
 		//glm::perspective(glm::radians(45.0f), m_SwapChainExtent.width / (float)m_SwapChainExtent.height, 0.1f, 10.0f);
-		
+
 		ubo.proj[1][1] *= -1;
 
 		memcpy(m_UniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
@@ -1375,7 +1369,7 @@ private:
 
 	void TransitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout) {
 		VkCommandBuffer commandBuffer = BeginSingleTimeCommands();
-		
+
 		VkImageMemoryBarrier barrier{};
 		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
 		barrier.oldLayout = oldLayout;
@@ -1387,7 +1381,7 @@ private:
 		barrier.subresourceRange.baseMipLevel = 0;
 		barrier.subresourceRange.levelCount = 1;
 		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1; 
+		barrier.subresourceRange.layerCount = 1;
 
 		VkPipelineStageFlags sourceStage;
 		VkPipelineStageFlags destinationStage;
@@ -1485,7 +1479,7 @@ private:
 		vkBindImageMemory(m_Device, image, imageMemory, 0);
 	}
 
-	void CreateTextureImage() 
+	void CreateTextureImage()
 	{
 		int texWidth, texHeight, texChannels;
 		stbi_uc* pixels = stbi_load(TEXTURE_PATH.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -1501,7 +1495,7 @@ private:
 			imageSize,
 			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-			stagingBuffer, 
+			stagingBuffer,
 			stagingBufferMemory);
 
 		void* data;
@@ -1514,22 +1508,22 @@ private:
 		CreateImage(
 			texWidth,
 			texHeight,
-			VK_FORMAT_R8G8B8A8_SRGB, 
+			VK_FORMAT_R8G8B8A8_SRGB,
 			VK_IMAGE_TILING_OPTIMAL,
 			VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			m_TextureImage, 
+			m_TextureImage,
 			m_TextureImageMemory);
 
 		TransitionImageLayout(
-			m_TextureImage, 
-			VK_FORMAT_R8G8B8A8_SRGB, 
-			VK_IMAGE_LAYOUT_UNDEFINED, 
+			m_TextureImage,
+			VK_FORMAT_R8G8B8A8_SRGB,
+			VK_IMAGE_LAYOUT_UNDEFINED,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 		CopyBufferToImage(
 			stagingBuffer,
-			m_TextureImage, 
+			m_TextureImage,
 			static_cast<uint32_t>(texWidth),
 			static_cast<uint32_t>(texHeight));
 
@@ -1564,12 +1558,12 @@ private:
 		return imageView;
 	}
 
-	void CreateTextureImageView() 
+	void CreateTextureImageView()
 	{
 		m_TextureImageView = createImageView(m_TextureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
 	}
 
-	void CreateTextureSampler() 
+	void CreateTextureSampler()
 	{
 
 		VkPhysicalDeviceProperties properties{};
@@ -1604,11 +1598,11 @@ private:
 			VkFormatProperties props;
 			vkGetPhysicalDeviceFormatProperties(m_PhysicalDevice, format, &props);
 
-			if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) 
+			if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features)
 			{
 				return format;
 			}
-			else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) 
+			else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features)
 			{
 				return format;
 			}
@@ -1628,13 +1622,13 @@ private:
 		return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 	}
 
-	void CreateDepthResources() 
+	void CreateDepthResources()
 	{
 		VkFormat depthFormat = FindDepthFormat();
 		CreateImage(
-			m_SwapChainExtent.width, 
+			m_SwapChainExtent.width,
 			m_SwapChainExtent.height,
-			depthFormat, 
+			depthFormat,
 			VK_IMAGE_TILING_OPTIMAL,
 			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
@@ -1644,7 +1638,7 @@ private:
 		m_DepthImageView = createImageView(m_DepthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
 	}
 
-	void LoadModel() 
+	void LoadModel()
 	{
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
@@ -1661,7 +1655,7 @@ private:
 			for (const auto& index : shape.mesh.indices) {
 				Vertex vertex{};
 
-			
+
 
 				vertex.pos = {
 					attrib.vertices[3 * index.vertex_index + 0],
@@ -1772,13 +1766,13 @@ private:
 
 		result = vkQueuePresentKHR(m_PresentQueue, &presentInfo);
 
-		if (result == VK_ERROR_OUT_OF_DATE_KHR || 
-			result == VK_SUBOPTIMAL_KHR || 
+		if (result == VK_ERROR_OUT_OF_DATE_KHR ||
+			result == VK_SUBOPTIMAL_KHR ||
 			m_FramebufferResized)
 		{
 			RecreateSwapChain();
 		}
-		else if (result != VK_SUCCESS) 
+		else if (result != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to present swap chain image!");
 		}
@@ -1804,7 +1798,7 @@ private:
 
 	void Cleanup()
 	{
-		CleanupSwapChain();	
+		CleanupSwapChain();
 
 		vkDestroySampler(m_Device, m_TextureSampler, nullptr);
 		vkDestroyImageView(m_Device, m_TextureImageView, nullptr);
