@@ -311,8 +311,17 @@ private:
 		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scanCode, int action, int mods)
 			{
 				std::shared_ptr<CameraController>& controller = *(std::shared_ptr<CameraController>*)glfwGetWindowUserPointer(window);
-				if (controller->OnKeyPressed(key, action)) {
+				if (controller->OnKeyInput(key, action)) {
 					//std::cout << "key pressed:" << key << std::endl;
+				}
+			});
+
+		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods) 
+			{
+				std::shared_ptr<CameraController>& controller = *(std::shared_ptr<CameraController>*)glfwGetWindowUserPointer(window);
+				
+				if (controller->OnMouseButtonInput(button, action)) {
+					
 				}
 			});
 
@@ -320,12 +329,12 @@ private:
 			{
 				std::shared_ptr<CameraController>& controller = *(std::shared_ptr<CameraController>*)glfwGetWindowUserPointer(window);
 				
-				std::cout <<  xpos << std::endl;
+				std::cout << ypos<< std::endl;
 				if (controller->OnMouseMoved(xpos, ypos)) {
 					
 				}
 			});
-		//glfwSetMouseButtonCallback()
+		
 		//glfwSetCursorPosCallback()
 	}
 

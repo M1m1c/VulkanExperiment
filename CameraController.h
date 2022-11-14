@@ -8,8 +8,9 @@ public:
 	CameraController() = default;
 	~CameraController() = default;
 
-	bool OnKeyPressed(int key, int action);
+	bool OnKeyInput(int key, int action);
 	bool OnMouseMoved(float mouseX, float mouseY);
+	bool OnMouseButtonInput(int key, int action);
 	
 
 	void UpdateCamera(float deltaTime, struct CameraUniform& cameraUniform);
@@ -28,5 +29,6 @@ private:
 	float sensitivity = 10.f;
 
 	std::bitset<6> DirInputs;
-	
+	//std::bitset<3> MouseInputs;
+	bool mouseButtonDown = false;
 };
