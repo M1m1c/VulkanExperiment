@@ -43,6 +43,27 @@ bool CameraController::OnKeyInput(int key, int action)
 		retval = true;
 		break;
 
+
+	case GLFW_KEY_Q:
+		RotInputs[0] = value;
+		retval = true;
+		break;
+
+	case GLFW_KEY_E:
+		RotInputs[1] = value;
+		retval = true;
+		break;
+
+	case GLFW_KEY_R:
+		RotInputs[2] = value;
+		retval = true;
+		break;
+
+	case GLFW_KEY_F:
+		RotInputs[3] = value;
+		retval = true;
+		break;
+
 	}
 
 	return retval;
@@ -50,8 +71,12 @@ bool CameraController::OnKeyInput(int key, int action)
 
 bool CameraController::OnMouseMoved(float mouseX, float mouseY)
 {
-	rotate_horizontal = mouseX;
-	rotate_vertical = mouseY;
+	if (mouseButtonDown)
+	{
+		rotate_horizontal = mouseX;
+		rotate_vertical = mouseY;
+	}
+	
 	///*else
 	//{
 	//	rotate_horizontal = 0.f;
@@ -96,6 +121,8 @@ void CameraController::UpdateCamera(float deltaTime, CameraUniform& cameraUnifor
 
 
 	//Rotation
+	float yawDir = 0;
+	float pitchDir = 0;
 
 	if (mouseButtonDown)
 	{
@@ -104,12 +131,16 @@ void CameraController::UpdateCamera(float deltaTime, CameraUniform& cameraUnifor
 		auto halfWidth = (widthHeight.x * 0.5f);
 		auto halfHeight = (widthHeight.y * 0.5f);
 
-		auto yawDir = glm::clamp(rotate_horizontal - halfWidth, -halfWidth, halfWidth);
-		auto pitchDir = glm::clamp(rotate_vertical - halfHeight, -halfHeight, halfHeight);
-		//auto yawDir = rotate_horizontal < (widthHeight.x * 0.5) ? -1.f : rotate_horizontal >(widthHeight.x * 0.5) ? 1.f : 0.f;
-
-		cam.Yaw += glm::radians(yawDir) * sensitivity * deltaTime;
-		cam.Pitch -= glm::radians(pitchDir) * sensitivity * deltaTime;
+		yawDir = glm::clamp(rotate_horizontal - halfWidth, -halfWidth, halfWidth);
+		pitchDir = glm::clamp(rotate_vertical - halfHeight, -halfHeight, halfHeight);
+		//auto yawDir = rotate_horizontal < (widthHeight.x * 0.5) ? -1.f : rotate_horizontal >(widthHeight.x * 0.5) ? 1.f : 0.f;	
 	}
+	else if (RotInputs.any())
+	{
+		yawDir = (RotInputs[0] == 1 ? -200.f : (RotInputs[1] == 1 ? 200.f : 0.f));
+		pitchDir = (RotInputs[2] == 1 ? -200.f : (RotInputs[3] == 1 ? 200.f : 0.f));
+	}
+	cam.Yaw += glm::radians(yawDir) * sensitivity * deltaTime;
+	cam.Pitch -= glm::radians(pitchDir) * sensitivity * deltaTime;
 	
 }

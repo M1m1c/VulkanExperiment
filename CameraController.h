@@ -26,9 +26,9 @@ private:
 	float rotate_vertical =0.f;
 	float scroll;
 	float speed = 1.f;
-	float sensitivity = 10.f;
+	float sensitivity = 15.f;
 
 	std::bitset<6> DirInputs;
-	//std::bitset<3> MouseInputs;
+	std::bitset<4> RotInputs;
 	bool mouseButtonDown = false;
 };
