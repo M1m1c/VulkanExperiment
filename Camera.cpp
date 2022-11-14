@@ -1,6 +1,8 @@
 #include "Camera.h"
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/ext/quaternion_trigonometric.hpp>
 
 
 Camera::Camera()
@@ -17,15 +19,21 @@ Camera::Camera(vec3 position, f32 pitch, f32 yaw) :
 
 mat4 Camera::CalcViewMatrix()
 {
-	return glm::lookAtRH(Position, Position + GetCamForward(), WorldUp);
+	glm::mat4 transformMatrix = glm::translate(glm::mat4(1.0f), -Position);
+	glm::mat4 rotMatrix = glm::mat4(1.0f);
+
+	rotMatrix = glm::rotate(rotMatrix, glm::radians(Pitch), glm::vec3(1.0f, 0.0f, 0.0f));
+	rotMatrix = glm::rotate(rotMatrix, glm::radians(Yaw), glm::vec3(0.0f, 1.0f, 0.0f));
+
+	return rotMatrix * transformMatrix;
 }
 
 vec3 Camera::GetCamForward()
 {
 	glm::vec3 dir;
-	dir.x = cos(glm::radians(Pitch)) * cos(glm::radians(Yaw));
-	dir.y = -sin(glm::radians(Yaw));
-	dir.z = sin(glm::radians(Pitch));
+	dir.x = -cos(glm::radians(Pitch)) * sin(glm::radians(Yaw));
+	dir.y = sin(glm::radians(Pitch));
+	dir.z = cos(glm::radians(Pitch)) * cos(glm::radians(Yaw));
 	return glm::normalize(dir);
 }
 
