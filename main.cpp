@@ -164,6 +164,7 @@ struct UniformBufferObject {
 	glm::mat4 model;
 	glm::mat4 view;
 	glm::mat4 proj;
+	glm::vec3 lightPos;
 };
 
 
@@ -1360,17 +1361,17 @@ private:
 
 
 		UniformBufferObject ubo{};
-		ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		//ubo.model = glm::mat4(1.0f);
 
-		//TODO change out view and projeciton to be based on camera uniform
+		ubo.model = glm::mat4(1.0f);
+
 		ubo.view = m_CameraUniform.Cam.CalcViewMatrix();
-		//glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 
 		ubo.proj = m_CameraUniform.Proj.CalcProjectionMatrix();
-		//glm::perspective(glm::radians(45.0f), m_SwapChainExtent.width / (float)m_SwapChainExtent.height, 0.1f, 10.0f);
 
 		ubo.proj[1][1] *= -1;
+
+		auto rotate = glm::rotate(glm::mat4(1.0f), time * glm::radians(15.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		ubo.lightPos = rotate[0];
 
 		memcpy(m_UniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 	}
