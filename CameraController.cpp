@@ -97,22 +97,25 @@ bool CameraController::OnMouseButtonInput(int key, int action)
 
 void CameraController::UpdateCamera(float deltaTime, CameraUniform& cameraUniform)
 {
-	//Directionals
 
 	auto& cam = cameraUniform.Cam;
-	auto forward = cam.GetCamForward();
 
-	glm::vec3 right = glm::normalize(glm::cross(forward, WorldUp));
+	//Directionals
+	if (DirInputs.any())
+	{
+		auto forward = cam.GetCamForward();
 
-	inputAxis.x = (DirInputs[0] == 1 ? -1.f : (DirInputs[1] == 1 ? 1.f : 0.f));
-	inputAxis.y = (DirInputs[2] == 1 ? 1.f : (DirInputs[3] == 1 ? -1.f : 0.f));
-	inputAxis.z = (DirInputs[4] == 1 ? 1.f : (DirInputs[5] == 1 ? -1.f : 0.f));
+		glm::vec3 right = glm::normalize(glm::cross(forward, WorldUp));
 
-	glm::vec3 dir = glm::normalize((forward * inputAxis.x) + (right * inputAxis.y) + (WorldUp * inputAxis.z));
+		inputAxis.x = (DirInputs[0] == 1 ? -1.f : (DirInputs[1] == 1 ? 1.f : 0.f));
+		inputAxis.y = (DirInputs[2] == 1 ? 1.f : (DirInputs[3] == 1 ? -1.f : 0.f));
+		inputAxis.z = (DirInputs[4] == 1 ? 1.f : (DirInputs[5] == 1 ? -1.f : 0.f));
 
-	dir = glm::isnan(dir).b ? glm::vec3(0.f) : dir;
-	cam.Position = cam.Position + (dir * speed * deltaTime);
+		glm::vec3 dir = glm::normalize((forward * inputAxis.x) + (right * inputAxis.y) + (WorldUp * inputAxis.z));
 
+		dir = glm::isnan(dir).b ? glm::vec3(0.f) : dir;
+		cam.Position = cam.Position + (dir * speed * deltaTime);
+	}
 
 	//Rotation
 	float yawDir = 0;
@@ -126,7 +129,7 @@ void CameraController::UpdateCamera(float deltaTime, CameraUniform& cameraUnifor
 		auto halfHeight = (widthHeight.y * 0.5f);
 
 		yawDir = glm::clamp(mouseRotateHorizontal - halfWidth, -halfWidth, halfWidth);
-		pitchDir = glm::clamp(mouseRotateVertical - halfHeight, -halfHeight, halfHeight);	
+		pitchDir = glm::clamp(mouseRotateVertical - halfHeight, -halfHeight, halfHeight);
 	}
 	else if (RotInputs.any())
 	{
@@ -135,5 +138,5 @@ void CameraController::UpdateCamera(float deltaTime, CameraUniform& cameraUnifor
 	}
 	cam.Yaw += glm::radians(yawDir) * sensitivity * deltaTime;
 	cam.Pitch += glm::radians(pitchDir) * sensitivity * deltaTime;
-	
+
 }
