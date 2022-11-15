@@ -103,7 +103,8 @@ struct SwapChainSupportDetails {
 struct Vertex {
 	glm::vec3 pos;
 	glm::vec3 color;
-	glm::vec2 texCoord;
+	glm::vec3 normal;
+	glm::vec2 uv;
 
 
 	static VkVertexInputBindingDescription getBindingDescription()
@@ -116,8 +117,8 @@ struct Vertex {
 		return bindingDescription;
 	}
 
-	static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions() {
-		std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
+	static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions() {
+		std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
 
 		attributeDescriptions[0].binding = 0;
 		attributeDescriptions[0].location = 0;
@@ -131,14 +132,21 @@ struct Vertex {
 
 		attributeDescriptions[2].binding = 0;
 		attributeDescriptions[2].location = 2;
-		attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-		attributeDescriptions[2].offset = offsetof(Vertex, texCoord);
+		attributeDescriptions[2].format = VK_FORMAT_R32G32B32_SFLOAT;
+		attributeDescriptions[2].offset = offsetof(Vertex, normal);
+
+		attributeDescriptions[3].binding = 0;
+		attributeDescriptions[3].location = 3;
+		attributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT;
+		attributeDescriptions[3].offset = offsetof(Vertex, uv);
+
+
 
 		return attributeDescriptions;
 	}
 
 	bool operator==(const Vertex& other) const {
-		return pos == other.pos && color == other.color && texCoord == other.texCoord;
+		return pos == other.pos && color == other.color && normal == other.normal && uv == other.uv;
 	}
 };
 
@@ -147,7 +155,7 @@ namespace std {
 		size_t operator()(Vertex const& vertex) const {
 			return ((hash<glm::vec3>()(vertex.pos) ^
 				(hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^
-				(hash<glm::vec2>()(vertex.texCoord) << 1);
+				(hash<glm::vec2>()(vertex.uv) << 1);
 		}
 	};
 }
@@ -1352,8 +1360,8 @@ private:
 
 
 		UniformBufferObject ubo{};
-		//ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		ubo.model = glm::mat4(1.0f);
+		ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		//ubo.model = glm::mat4(1.0f);
 
 		//TODO change out view and projeciton to be based on camera uniform
 		ubo.view = m_CameraUniform.Cam.CalcViewMatrix();
@@ -1663,7 +1671,13 @@ private:
 					attrib.vertices[3 * index.vertex_index + 2]
 				};
 
-				vertex.texCoord = {
+				vertex.normal = {
+					attrib.normals[3 * index.normal_index + 0],
+					attrib.normals[3 * index.normal_index + 1],
+					attrib.normals[3 * index.normal_index + 2]
+				};
+
+				vertex.uv = {
 					attrib.texcoords[2 * index.texcoord_index + 0],
 					1.0f - attrib.texcoords[2 * index.texcoord_index + 1]
 				};
@@ -1820,7 +1834,7 @@ private:
 			vkDestroyFence(m_Device, m_InFlightFences[i], nullptr);
 			vkDestroyBuffer(m_Device, m_UniformBuffers[i], nullptr);
 			vkFreeMemory(m_Device, m_UniformBuffersMemory[i], nullptr);
-		}
+		}	
 
 		vkDestroyDescriptorPool(m_Device, m_DescriptorPool, nullptr);;
 
@@ -1829,10 +1843,6 @@ private:
 		vkDestroyCommandPool(m_Device, m_CommandPool, nullptr);
 
 		vkDestroyPipeline(m_Device, m_GraphicsPipeline, nullptr);
-
-		vkDestroyPipelineLayout(m_Device, m_PipelineLayout, nullptr);
-
-		vkDestroyPipelineLayout(m_Device, m_PipelineLayout, nullptr);
 
 		vkDestroyRenderPass(m_Device, m_RenderPass, nullptr);
 
