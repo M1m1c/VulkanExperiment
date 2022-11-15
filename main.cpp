@@ -52,8 +52,8 @@ const uint32_t WIDTH = 800;
 const uint32_t HEIGHT = 600;
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
-const std::string MODEL_PATH = "assets/kv2.obj";
-const std::string TEXTURE_PATH = "assets/KV2_diff.jpg";
+const std::string MODEL_PATH = "assets/Napoleon.obj";
+const std::string TEXTURE_PATH = "assets/Napoleon.jpg";
 
 
 const std::vector<const char*> validationLayers = {
@@ -302,7 +302,7 @@ private:
 
 		//TODO figure out why we cant set it up like this
 		m_CameraUniform = CameraUniform(
-			Camera(glm::vec3(0.f, 0.5f, 2.f), 0.f, 0.f),
+			Camera(glm::vec3(0.f, 2.f, 5.f), 0.f, 0.f),
 			Projection(WIDTH, HEIGHT, 60.f, 0.1f, 10.0f));
 
 		m_CameraController = std::make_unique<CameraController>();
