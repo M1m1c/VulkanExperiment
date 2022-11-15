@@ -82,3 +82,17 @@ mat4 CameraUniform::CalcMVP()
 {
 	return Proj.CalcProjectionMatrix() * Cam.CalcViewMatrix();
 }
+
+SceneLight::SceneLight()
+{
+	Yaw = 0.f;
+	Pitch = 0.f;
+}
+
+vec3 SceneLight::GetLightPosition()
+{
+	glm::mat4 rotMatrix = glm::mat4(1.0f);
+	rotMatrix = glm::rotate(rotMatrix, glm::radians(Yaw), glm::vec3(0.0f, 1.0f, 0.0f));
+	rotMatrix = glm::rotate(rotMatrix, glm::radians(Pitch), glm::vec3(1.0f, 0.0f, 0.0f));
+	return rotMatrix[0] + rotMatrix[1] + rotMatrix[2]+rotMatrix[3];
+}

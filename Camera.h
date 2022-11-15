@@ -33,6 +33,15 @@ private:
 	u32 Height;
 };
 
+struct SceneLight
+{
+public:
+	SceneLight();
+	vec3 GetLightPosition();
+	f32 Yaw;
+	f32 Pitch;
+};
+
 struct CameraUniform
 {
 public:
@@ -41,4 +50,5 @@ public:
 	mat4 CalcMVP();
 	Camera Cam;
 	Projection Proj;
+	SceneLight Light;
 };
