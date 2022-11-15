@@ -22,10 +22,12 @@ private:
 	float mouseRotateHorizontal = 0.f;
 	float mouseRotateVertical = 0.f;
 	float scroll;
-	float speed = 1.f;
+	float dirSpeed = 1.f;
+	float rotSpeed = 200.f;
 	float sensitivity = 15.f;
 
 	std::bitset<6> DirInputs;
 	std::bitset<4> RotInputs;
+	std::bitset<4> LightInputs;
 	bool mouseButtonDown = false;
 };
