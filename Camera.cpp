@@ -89,7 +89,7 @@ SceneLight::SceneLight()
 	Pitch = 0.f;
 }
 
-vec3 SceneLight::GetLightPosition()
+vec3 SceneLight::GetLightDirection()
 {
 	glm::mat4 rotMatrix = glm::mat4(1.0f);
 	rotMatrix = glm::rotate(rotMatrix, glm::radians(Yaw), glm::vec3(0.0f, 1.0f, 0.0f));

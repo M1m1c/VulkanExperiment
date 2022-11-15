@@ -37,7 +37,7 @@ struct SceneLight
 {
 public:
 	SceneLight();
-	vec3 GetLightPosition();
+	vec3 GetLightDirection();
 	f32 Yaw;
 	f32 Pitch;
 };

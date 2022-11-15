@@ -5,7 +5,7 @@ layout(binding = 0) uniform UniformBufferObject {
     mat4 model;
     mat4 view;
     mat4 proj;
-    vec3 lightPos;
+    vec3 lightDirection;
 } ubo;
 
 layout(location = 0) in vec3 inPosition;
@@ -24,7 +24,7 @@ void main() {
 
    vec3 normalWorldSpace = normalize(mat3(ubo.model) * inNormal );//normalize((ubo.model *vec4(inNormal,0.0)).xyz);
 
-   float lightIntensity = max(dot(normalWorldSpace,ubo.lightPos), 0);
+   float lightIntensity = max(dot(normalWorldSpace, normalize(ubo.lightDirection)), 0);
 
    fragColor = AMBIENT + (lightIntensity * inColor);
    fragUV = inUV;

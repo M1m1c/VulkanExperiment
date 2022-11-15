@@ -164,7 +164,7 @@ struct UniformBufferObject {
 	glm::mat4 model;
 	glm::mat4 view;
 	glm::mat4 proj;
-	glm::vec3 lightPos;
+	glm::vec3 lightDirection;
 };
 
 
@@ -1371,7 +1371,7 @@ private:
 		ubo.proj[1][1] *= -1;
 
 		//auto rotate = glm::rotate(glm::mat4(1.0f), time * glm::radians(15.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-		ubo.lightPos = m_CameraUniform.Light.GetLightPosition();
+		ubo.lightDirection = m_CameraUniform.Light.GetLightDirection();
 
 		memcpy(m_UniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
 	}
