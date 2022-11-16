@@ -336,8 +336,6 @@ private:
 
 				controller->OnMouseMoved(xpos, ypos);
 			});
-
-		//glfwSetCursorPosCallback()
 	}
 
 	void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
