@@ -1786,7 +1786,7 @@ private:
 	{
 		while (!glfwWindowShouldClose(m_Window))
 		{
-			float currentTime = glfwGetTime();//Should be in a platform class
+			float currentTime = glfwGetTime();
 			float deltaTime = currentTime - m_LastFrameTime;
 			m_LastFrameTime = currentTime;
 
