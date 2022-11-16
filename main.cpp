@@ -309,7 +309,6 @@ private:
 		glfwSetWindowUserPointer(m_Window, this);
 		glfwSetFramebufferSizeCallback(m_Window, FramebufferResizeCallback);
 
-		//TODO figure out why we cant set it up like this
 		m_CameraUniform = CameraUniform(
 			Camera(glm::vec3(0.f, 2.f, 5.f), 0.f, 0.f),
 			Projection(WIDTH, HEIGHT, 60.f, 0.1f, 10.0f));
@@ -834,11 +833,6 @@ private:
 		colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
 		colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
 
-		//For blending
-	/*	colorBlendAttachment.blendEnable = VK_TRUE;
-		colorBlendAttachment.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
-		colorBlendAttachment.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;*/
-
 		colorBlendAttachment.colorBlendOp = VK_BLEND_OP_ADD; // Optional
 		colorBlendAttachment.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE; // Optional
 		colorBlendAttachment.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO; // Optional
@@ -1356,10 +1350,6 @@ private:
 	{
 		static auto startTime = std::chrono::high_resolution_clock::now();
 
-	/*	auto currentTime = std::chrono::high_resolution_clock::now();
-		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();*/
-
-
 		UniformBufferObject ubo{};
 
 		ubo.model = glm::mat4(1.0f);
@@ -1370,7 +1360,6 @@ private:
 
 		ubo.proj[1][1] *= -1;
 
-		//auto rotate = glm::rotate(glm::mat4(1.0f), time * glm::radians(15.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		ubo.lightDirection = m_CameraUniform.Light.GetLightDirection();
 
 		memcpy(m_UniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
@@ -1932,23 +1921,6 @@ private:
 	std::unique_ptr<CameraController> m_CameraController;
 	CameraUniform m_CameraUniform;
 	float m_LastFrameTime;
-
-	/*const std::vector<Vertex> m_Vertices = {
-	 {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-	{{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-	{{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-	{{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-
-	{{-0.5f, -0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
-	{{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}},
-	{{0.5f, 0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}},
-	{{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}}
-	};
-
-	const std::vector<uint16_t> m_Indices = {
-		0, 1, 2, 2, 3, 0,
-		4, 5, 6, 6, 7, 4
-	};*/
 };
 
 
